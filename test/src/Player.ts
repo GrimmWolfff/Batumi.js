@@ -1,21 +1,19 @@
 import Card from "./Card";
 import { GameComponent as Game } from '../../app/src/app/components/game/game.component';
+import { res } from "./functions/Combinations";
 // import Game from './index';
 
-interface Combo {
-    comboName: string,
-    strength: number,
-    cards: string[]
-};
 
 export default class Player {
     playerCards:Card[];
-    bestCombo:Combo;
+    bestCombo:res;
     game:Game;
+    money:number;
     constructor(game: Game) {
         this.game = game;
         this.playerCards = this.DealCards();
-        this.bestCombo = { comboName: "", strength: 0, cards: [] }
+        this.bestCombo = { combo: "", comboName: "" }
+        this.money = 100;
     }
     DealCards():Card[] {
         let cardsForPlayer:Card[] = [];

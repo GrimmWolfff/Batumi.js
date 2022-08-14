@@ -1,4 +1,5 @@
 import Card from "../Card";
+import Player from "../Player";
 
 export const NumberToType:object = {
     2: '2',
@@ -16,6 +17,16 @@ export const NumberToType:object = {
     14: 'A'
 }
 
+export const CombinationPower:object = {
+    "Pair" : 1,
+    "Two Pairs" : 2,
+    "Three of a kind" : 3,
+    "Four of a kind" : 4,
+    "Straight" : 5,
+    "Flush" : 6,
+    "Straight Flush" : 7,
+}
+
 export interface res {
     combo: string[] | boolean | string,
     comboName: string
@@ -30,7 +41,7 @@ export function Convert(p1_cards: Card[]): object {
     return p1Obj;
 }
 
-export function Pair(p1: Card[]) {
+export function Pair(p1: Card[], idx:number, players:Player[]) {
     let p1Obj = Convert(p1)
     let pairs1 = Object.entries(p1Obj).filter(subArr => subArr[1] === 2);
     let alltypes1 = pairs1.map(i => i[0]);
@@ -38,10 +49,11 @@ export function Pair(p1: Card[]) {
     alltypes1.map(t => arr1.push(Number(Object.entries(NumberToType).filter(arr => arr[1] == t)[0][0])))
     let res1:number = NumberToType[Math.max(...arr1) as keyof object];
     let finalRes:res = { combo: res1 == undefined ? false : res1.toString(), comboName: 'Pair' }
+    players[idx].bestCombo = finalRes;
     return finalRes;
 }
 
-export function TwoPairs(p1: Card[]) {
+export function TwoPairs(p1: Card[], idx:number, players:Player[]) {
     let p1Obj = Convert(p1)
     let pairs1 = Object.entries(p1Obj).filter(subArr => subArr[1] === 2);
     let alltypes1 = pairs1.map(i => i[0]);
@@ -55,10 +67,11 @@ export function TwoPairs(p1: Card[]) {
         combo: res.map(i => i == 'undefined') ? false : res, 
         comboName: 'Two Pairs' 
     }
+    players[idx].bestCombo = finalRes;
     return finalRes;
 }
 
-export function ThreeOfAKind(p1: Card[]) {
+export function ThreeOfAKind(p1: Card[], idx:number, players:Player[]) {
     let p1Obj = Convert(p1)
     let pairs1 = Object.entries(p1Obj).filter(subArr => subArr[1] === 3);
     let alltypes1 = pairs1.map(i => i[0]);
@@ -72,10 +85,11 @@ export function ThreeOfAKind(p1: Card[]) {
         combo: res == undefined ? false : res, 
         comboName: 'Three of a kind' 
     }
+    players[idx].bestCombo = finalRes;
     return finalRes;
 }
 
-export function FourOfAKind(p1: Card[]) {
+export function FourOfAKind(p1: Card[], idx:number, players:Player[]) {
     let p1Obj = Convert(p1)
     let pairs1 = Object.entries(p1Obj).filter(subArr => subArr[1] === 4);
     let alltypes1 = pairs1.map(i => i[0]);
@@ -89,10 +103,11 @@ export function FourOfAKind(p1: Card[]) {
         combo: res == undefined ? false : res, 
         comboName: 'Four of a kind' 
     }
+    players[idx].bestCombo = finalRes;
     return finalRes;
 }
 
-export function Straight(p1: Card[]) {
+export function Straight(p1: Card[], idx:number, players:Player[]) {
     let types1:string[] = [], types2:number[] = [];
     p1.map(i => types1.push(i.type));
     let rr:any[] = Object.keys(NumberToType) as keyof object;
@@ -115,7 +130,7 @@ export function Straight(p1: Card[]) {
     LastFiveElements = LastFiveElements.sort((a,b) => a - b).map(el => NumberToType[el as keyof object]);
     checkStraight = types1.map(el => Number(rr.find(k => NumberToType[k as keyof object] === el))).sort((a,b) => b - a);
     for(let i = 0; i < checkStraight.length - 1; i++) {
-        if(checkStraight[i] - 1 == checkStraight[i + 1]) {
+        if(checkStraight[i] - 1 == checkStraight[i + 1] && checkStraight.length === 5) {
             finalRes = {
                 combo: LastFiveElements.map(el => NumberToType[el as keyof object]),
                 comboName: "Straight"
@@ -131,7 +146,7 @@ export function Straight(p1: Card[]) {
     return finalRes;
 }
 
-export function Flush(p1: Card[]) {
+export function Flush(p1: Card[], idx:number, players:Player[]) {
     let colors:string[] = [];
     p1.map(i => colors.push(i.color));
     const count = (strings:string[]) => strings.reduce((a, b) => ({ ...a, [b]: (a[b as keyof object] || 0) + 1}), {})
@@ -152,10 +167,19 @@ export function Flush(p1: Card[]) {
             combo: finalCards,
             comboName: 'Flush'
         }
+        players[idx].bestCombo = finalRes;
         return finalRes;
     } else {
         return { combo: false, comboName: 'Flush' }
     }
 }
-export const StraightFlush = (p1: Card[]) => Flush(p1).combo && Straight(p1).combo && Straight(p1) == Flush(p1) ? 
-    { combo: Straight(p1).combo, comboName: "Straight Flush" } : { combo: false, comboName: "Straight Flush" }
+export const StraightFlush = (p1: Card[], idx:number, players:Player[]) => {
+    let finalRes:res = 
+        Flush(p1, idx, players).combo 
+    &&  Straight(p1, idx, players).combo
+    &&  Straight(p1, idx, players) == Flush(p1, idx, players) 
+    ? { combo: Straight(p1, idx, players).combo, comboName: "Straight Flush" } 
+    : { combo: false, comboName: "Straight Flush" };
+    players[idx].bestCombo == finalRes;
+    return finalRes;
+} 

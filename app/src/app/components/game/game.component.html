@@ -1,18 +1,26 @@
-<div class="main">
+<div class="main">  
     <div class="players" *ngFor="let player of players; let indexOfelement=index;">
         <div class="player">
             <span>Player {{ indexOfelement }}<br/></span>
+            <h2>${{ player.money }}</h2>
             <h3> <br/> Best Combination: {{ CheckCombinations(indexOfelement).comboName }}</h3>
-            <p class="hand">
-                <span>Hand: &nbsp;&nbsp;</span>
-                <span *ngFor="let card of player.playerCards">{{ card.type }}{{ card.color }}&nbsp;</span>
-            </p>        
+            <div class="hand">
+                <div>
+                    <span *ngFor="let card of player.playerCards">
+                        <img src={{card.image}} alt="..">
+                    </span>    
+                </div>
+                <button (click)="IncreaseStage()">Check</button>
+                <button (click)="Bet(indexOfelement)">$10</button>                
+            </div>
         </div>
     </div>
-    <h3>Board</h3>
     <div class="board">
-        <p>
-            <span *ngFor="let card of board.cardsOnBoard"> {{ card.type }}{{ card.color }} </span>
-        </p>
+        <h3>Bet ${{board.moneyOnBoard}}</h3>
+        <div>
+            <span *ngFor="let card of board.cardsOnBoard"> 
+                <img src={{card.image}} alt="...">
+            </span>    
+        </div>
     </div>
 </div>
